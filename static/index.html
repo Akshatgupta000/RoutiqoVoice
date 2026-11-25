@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Routiqo AI Sales Agent</title>
+    <link rel="icon" href="/static/assets/logo.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/style.css?v=5" />
+  </head>
+  <body data-phase="idle">
+    <aside class="rail" aria-label="Primary">
+      <img src="/static/assets/logo.svg" alt="Routiqo" width="30" height="30" />
+      <button
+        class="rail-btn is-active"
+        type="button"
+        data-view="chat"
+        aria-label="Chat mode"
+        title="Chat mode"
+      >
+        <svg viewBox="0 0 24 24">
+          <path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z" />
+        </svg>
+      </button>
+      <button
+        class="rail-btn"
+        type="button"
+        data-view="overview"
+        aria-label="Overview"
+        title="Overview"
+      >
+        <svg viewBox="0 0 24 24">
+          <rect x="4" y="4" width="7" height="7" rx="1.5" />
+          <rect x="13" y="4" width="7" height="7" rx="1.5" />
+          <rect x="4" y="13" width="7" height="7" rx="1.5" />
+          <rect x="13" y="13" width="7" height="7" rx="1.5" />
+        </svg>
+      </button>
+      <button
+        class="rail-btn"
+        type="button"
+        data-jump="leads"
+        aria-label="Saved leads"
+        title="Saved leads"
+      >
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10" /></svg>
+      </button>
+    </aside>
+
+    <div class="shell">
+      <header class="topbar">
+        <p class="crumbs">
+          Home <span aria-hidden="true">/</span> <strong>AI Sales Agent</strong>
+        </p>
+        <div class="tabs" role="tablist" aria-label="Views">
+          <button class="tab is-active" type="button" data-view="chat">
+            Chat Mode
+          </button>
+          <button class="tab" type="button" data-view="overview">
+            Overview
+          </button>
+        </div>
+        <div class="topbar-status">
+          <span id="connection-status" class="chip">Checking connection</span>
+          <span id="ai-mode" class="chip">AI status</span>
+          <span id="activity-status" class="chip chip-live" aria-live="polite"
+            >Idle</span
+          >
+          <button
+            id="new-conversation"
+            class="button button-quiet button-small"
+            type="button"
+          >
+            New conversation
+          </button>
+        </div>
+      </header>
+
+      <p id="demo-banner" class="banner" hidden></p>
+
+      <main class="stage">
+        <div data-view-pane="chat">
+          <section class="agent" id="agent" aria-labelledby="hero-title">
+            <button
+              id="mic-btn"
+              class="orb"
+              type="button"
+              aria-pressed="false"
+              aria-label="Microphone"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 15a3 3 0 0 0 3-3V7a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3z"
+                  fill="currentColor"
+                />
+                <path
+                  d="M6.5 11a.75.75 0 0 1 .75.75 4.75 4.75 0 0 0 9.5 0 .75.75 0 0 1 1.5 0 6.25 6.25 0 0 1-5.5 6.2V20h2a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1 0-1.5h2v-2.05A6.25 6.25 0 0 1 5.75 11.75.75.75 0 0 1 6.5 11z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+            <p id="hero-state" class="hero-state" aria-live="polite">
+              Ready to talk
+            </p>
+            <h1 id="hero-title">Your AI sales agent, ready to listen.</h1>
+            <p class="hero-sub">
+              Discover customer needs. Qualify leads. Turn conversations into
+              opportunities.
+            </p>
+
+            <ol class="stages" aria-label="Sales workflow">
+              <li id="stage-listen">Listen</li>
+              <li id="stage-reply">Reply</li>
+              <li id="stage-qualify">Qualify</li>
+              <li id="stage-save">Save lead</li>
+            </ol>
+
+            <div id="transcript" class="transcript" aria-live="polite">
+              <p class="message system">
+                Use speech recognition if your browser supports it, or type a
+                customer reply. Browser support varies; this page does not place
+                a telephone call.
+              </p>
+            </div>
+            <p id="draft-line" class="draft" hidden></p>
+
+            <form id="text-form" class="composer">
+              <label class="sr-only" for="message-input"
+                >Customer message</label
+              >
+              <input
+                id="message-input"
+                type="text"
+                maxlength="4000"
+                placeholder="Type a customer reply if the microphone is unavailable"
+                autocomplete="off"
+              />
+              <div class="toolbar">
+                <div class="voice-extras" hidden>
+                  <button
+                    id="start-btn"
+                    class="button button-small"
+                    type="button"
+                  >
+                    Start Listening
+                  </button>
+                  <button
+                    id="stop-btn"
+                    class="button button-quiet button-small"
+                    type="button"
+                    disabled
+                  >
+                    Stop Listening
+                  </button>
+                  <label class="language-choice" for="recognition-language"
+                    >Speech language
+                    <select id="recognition-language">
+                      <option value="en-IN" selected>English (India)</option>
+                      <option value="en-US">English (US)</option>
+                    </select>
+                  </label>
+                  <button
+                    id="clear-transcript"
+                    class="button button-quiet button-small"
+                    type="button"
+                  >
+                    Clear Transcript
+                  </button>
+                </div>
+                <button
+                  id="send-btn"
+                  class="send"
+                  type="submit"
+                  aria-label="Send"
+                >
+                  <svg viewBox="0 0 24 24">
+                    <path d="M4 12l16-8-6 16-3-7z" />
+                  </svg>
+                </button>
+              </div>
+            </form>
+            <p id="speech-support" class="support-note"></p>
+            <details class="demo-lines">
+              <summary>Suggested lines for the live demo</summary>
+              <ol>
+                <li>Hi, I am Priya Shah from Northline Logistics.</li>
+                <li>We have 35 vehicles.</li>
+                <li>
+                  We struggle with manual route planning and late deliveries.
+                </li>
+                <li>
+                  My email is priya@northline.example and yes, I would like a
+                  product demo.
+                </li>
+                <li>How does Routiqo optimize routes?</li>
+              </ol>
+            </details>
+          </section>
+
+          <nav class="actions" aria-label="Sales tools">
+            <button
+              class="action"
+              type="button"
+              data-panel="lead"
+              aria-expanded="false"
+              aria-controls="panel-lead"
+            >
+              <span class="action-top"
+                ><span class="tile tile-blue"
+                  ><svg viewBox="0 0 24 24">
+                    <path d="M5 12l4 4 10-10" /></svg></span
+                >Lead qualification</span
+              >
+              <span class="action-foot"
+                >Qualify the lead <span aria-hidden="true">→</span></span
+              >
+            </button>
+            <button
+              class="action"
+              type="button"
+              data-panel="summary"
+              aria-expanded="false"
+              aria-controls="panel-summary"
+            >
+              <span class="action-top"
+                ><span class="tile tile-violet"
+                  ><svg viewBox="0 0 24 24">
+                    <path d="M7 4h8l4 4v12H7zM15 4v4h4" /></svg></span
+                >Call summary</span
+              >
+              <span class="action-foot"
+                >Review the call <span aria-hidden="true">→</span></span
+              >
+            </button>
+            <button
+              class="action"
+              type="button"
+              data-panel="leads"
+              aria-expanded="false"
+              aria-controls="panel-leads"
+            >
+              <span class="action-top"
+                ><span class="tile tile-red"
+                  ><svg viewBox="0 0 24 24">
+                    <path d="M4 6h16M4 12h16M4 18h10" /></svg></span
+                >Saved leads</span
+              >
+              <span class="action-foot"
+                >Browse the pipeline <span aria-hidden="true">→</span></span
+              >
+            </button>
+          </nav>
+
+          <section
+            id="panel-lead"
+            class="panel"
+            hidden
+            aria-labelledby="lead-title"
+          >
+            <div class="panel-head">
+              <h2 id="lead-title">Lead qualification</h2>
+            </div>
+            <form id="lead-form" autocomplete="off">
+              <div class="fields">
+                <label
+                  >Customer name
+                  <input
+                    id="customer-name"
+                    name="customer_name"
+                    maxlength="120"
+                    required
+                /></label>
+                <label
+                  >Company name
+                  <input
+                    id="company-name"
+                    name="company_name"
+                    maxlength="160"
+                    required
+                /></label>
+                <label
+                  >Email
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    maxlength="200"
+                    placeholder="Optional"
+                /></label>
+                <label
+                  >Vehicle count
+                  <input
+                    id="vehicle-count"
+                    name="vehicle_count"
+                    type="number"
+                    min="0"
+                    max="1000000"
+                    required
+                /></label>
+                <label class="wide"
+                  >Business problem
+                  <textarea
+                    id="business-problem"
+                    name="business_problem"
+                    maxlength="2000"
+                    rows="3"
+                  ></textarea>
+                </label>
+                <label
+                  >Demo interest
+                  <select id="demo-interest" name="interested_in_demo">
+                    <option value="unknown">Not discussed</option>
+                    <option value="yes">Yes, demo requested</option>
+                    <option value="no">No</option>
+                  </select>
+                </label>
+              </div>
+              <p id="demo-requested" class="flag" hidden>
+                Demo requested. This is not a confirmed calendar booking.
+              </p>
+              <div class="score-row">
+                <div>
+                  <p class="label">Lead score</p>
+                  <p id="lead-score" class="score-value">—</p>
+                </div>
+                <div>
+                  <p class="label">Status</p>
+                  <p id="qualification-status" class="status-pill">
+                    Not scored
+                  </p>
+                </div>
+              </div>
+              <p class="label pad">Recommended next action</p>
+              <p id="next-action" class="action-text">
+                Score is calculated on the server when the lead is saved.
+              </p>
+              <ul id="score-breakdown" class="breakdown" hidden></ul>
+              <p id="form-error" class="form-error" hidden></p>
+              <button id="save-lead" class="button button-full" type="submit">
+                Save lead and summarize
+              </button>
+            </form>
+          </section>
+
+          <section
+            id="panel-summary"
+            class="panel"
+            hidden
+            aria-labelledby="summary-title"
+          >
+            <div class="panel-head">
+              <h2 id="summary-title">Call summary</h2>
+              <button
+                id="read-summary"
+                class="button button-quiet button-small"
+                type="button"
+              >
+                Read aloud
+              </button>
+            </div>
+            <dl class="summary-list">
+              <div>
+                <dt>Customer requirements</dt>
+                <dd id="summary-requirements">No summary yet.</dd>
+              </div>
+              <div>
+                <dt>Business pain points</dt>
+                <dd id="summary-pain">—</dd>
+              </div>
+              <div>
+                <dt>Company size</dt>
+                <dd id="summary-size">—</dd>
+              </div>
+              <div>
+                <dt>Lead score</dt>
+                <dd id="summary-score">—</dd>
+              </div>
+              <div>
+                <dt>Demo interest</dt>
+                <dd id="summary-demo">—</dd>
+              </div>
+              <div class="wide">
+                <dt>Summary</dt>
+                <dd id="summary-text">—</dd>
+              </div>
+              <div class="wide">
+                <dt>Recommended next action</dt>
+                <dd id="summary-action">—</dd>
+              </div>
+            </dl>
+            <p id="summary-mode" class="meta-line"></p>
+          </section>
+
+          <section
+            id="panel-leads"
+            class="panel"
+            hidden
+            aria-labelledby="leads-title"
+          >
+            <div class="panel-head">
+              <h2 id="leads-title">Saved leads</h2>
+              <button
+                id="refresh-leads"
+                class="button button-quiet button-small"
+                type="button"
+              >
+                Refresh
+              </button>
+            </div>
+            <p id="leads-count" class="meta-line">No leads loaded.</p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Company</th>
+                    <th>Contact name</th>
+                    <th>Vehicle count</th>
+                    <th>Lead score</th>
+                    <th>Qualification status</th>
+                    <th>Demo interest</th>
+                    <th>Date created</th>
+                  </tr>
+                </thead>
+                <tbody id="leads-body"></tbody>
+              </table>
+            </div>
+            <p id="leads-empty" class="empty">
+              No leads saved yet. Finish a conversation, fill in the lead form,
+              and choose Save lead and summarize.
+            </p>
+          </section>
+
+          <section class="recent" aria-labelledby="recent-title">
+            <h2 id="recent-title">Recent leads</h2>
+            <ul id="recent-list">
+              <li class="recent-empty">Loading…</li>
+            </ul>
+          </section>
+        </div>
+
+        <div data-view-pane="overview" hidden>
+          <h2 class="pane-title">Overview</h2>
+          <div class="stats">
+            <div class="stat">
+              <p class="label">Total leads</p>
+              <p id="stat-total" class="stat-value">—</p>
+            </div>
+            <div class="stat">
+              <p class="label">Qualified leads</p>
+              <p id="stat-qualified" class="stat-value">—</p>
+            </div>
+            <div class="stat">
+              <p class="label">Demo requests</p>
+              <p id="stat-demo" class="stat-value">—</p>
+            </div>
+          </div>
+          <p id="stat-note" class="meta-line">Loading saved lead data…</p>
+        </div>
+      </main>
+    </div>
+    <script>
+      // Core navigation lives here so the cards work even if another file fails to load.
+      (function () {
+        const $ = (id) => document.getElementById(id);
+        const labels = {
+          idle: "Ready to talk",
+          listening: "Listening...",
+          thinking: "Thinking...",
+          speaking: "Speaking...",
+        };
+        const syncState = () => {
+          $("hero-state").textContent =
+            labels[document.body.dataset.phase] || labels.idle;
+        };
+        new MutationObserver(syncState).observe(document.body, {
+          attributes: true,
+          attributeFilter: ["data-phase"],
+        });
+        syncState();
+
+        function showView(name) {
+          document.querySelectorAll("[data-view-pane]").forEach((p) => {
+            p.hidden = p.dataset.viewPane !== name;
+          });
+          document
+            .querySelectorAll("[data-view]")
+            .forEach((b) =>
+              b.classList.toggle("is-active", b.dataset.view === name),
+            );
+        }
+        document
+          .querySelectorAll("[data-view]")
+          .forEach((b) =>
+            b.addEventListener("click", () => showView(b.dataset.view)),
+          );
+
+        function setPanel(name, open, scroll) {
+          const panel = $("panel-" + name);
+          const card = document.querySelector('[data-panel="' + name + '"]');
+          panel.hidden = !open;
+          card.classList.toggle("is-open", open);
+          card.setAttribute("aria-expanded", String(open));
+          if (open && scroll)
+            panel.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        document.querySelectorAll("[data-panel]").forEach((card) => {
+          card.addEventListener("click", () =>
+            setPanel(
+              card.dataset.panel,
+              $("panel-" + card.dataset.panel).hidden,
+              true,
+            ),
+          );
+        });
+        document.querySelector("[data-jump]").addEventListener("click", () => {
+          showView("chat");
+          setPanel("leads", true, true);
+        });
+        new MutationObserver(() => {
+          if ($("summary-mode").textContent) setPanel("summary", true, true);
+        }).observe($("summary-mode"), { childList: true });
+      })();
+    </script>
+    <script src="/static/script.js?v=4"></script>
+    <script src="/static/overview.js?v=4"></script>
+  </body>
+</html>
